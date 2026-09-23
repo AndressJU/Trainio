@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Trainio | Coach Personal & Gestión de Clientes</title>
+
+  <!-- SEO & PWA Meta Tags -->
+  <meta name="description"
+    content="Plataforma profesional para entrenadores personales y coaches fitness: control de clientes, creación de rutinas, seguimiento de progreso y planificación semanal.">
+  <meta name="theme-color" content="#08090d">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml"
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2322c55e'><path d='M20.57 14.86L22 13.43 20.57 12 17 15.57 8.43 7 12 3.43 10.57 2 9.14 3.43 7.71 2 5.57 4.14 4.14 2.71 2.71 4.14l1.43 1.43L2 7.71l1.43 1.43L2 10.57 3.43 12 7 8.43 15.57 17 12 20.57 13.43 22l1.43-1.43 1.43 1.43 2.14-2.14 1.43 1.43 1.43-1.43-1.43-1.43L22 16.29l-1.43-1.43z'/></svg>">
+
+  <!-- Google Fonts: Outfit & Space Grotesk -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap"
+    rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+  <div class="app-layout">
+
+    <!-- SIDEBAR DE NAVEGACIÓN (Desktop) -->
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <div class="brand-logo">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 16.326A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242" />
+            <path d="m8 15 4-4 4 4" />
+            <path d="M12 11v9" />
+          </svg>
+        </div>
+        <div class="brand-info">
+          <h2>TRAINIO</h2>
+          <span class="pro-badge" id="brand-role-badge">COACH PRO</span>
+        </div>
+      </div>
+
+      <!-- SELECTOR DE ROL (Entrenador vs Cliente) -->
+      <div class="role-switcher-wrapper">
+        <div class="role-switcher" id="role-switcher">
+          <button class="role-pill active" id="role-btn-coach" onclick="App.switchRole('coach')">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M6 16.326A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242" />
+              <path d="m8 15 4-4 4 4" />
+              <path d="M12 11v9" />
+            </svg>
+            <span>Coach Pro</span>
+          </button>
+          <button class="role-pill" id="role-btn-client" onclick="App.switchRole('client')">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <circle cx="12" cy="7" r="4" />
+              <path d="M5.5 21a8.38 8.38 0 0 1 13 0" />
+            </svg>
+            <span>Atleta</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- SELECTOR DE ATLETA ACTIVO (Para simular/probar cualquier atleta en modo cliente) -->
+      <div class="client-switcher-bar" id="client-switcher-bar" style="display: none;">
+        <span class="switcher-label">Atleta en sesión:</span>
+        <select id="active-client-select" onchange="App.switchActiveClient(this.value)">
+          <!-- Poblado dinámicamente -->
+        </select>
+      </div>
+
+      <!-- NAV MENÚ: ENTRENADOR -->
+      <nav class="nav-menu" id="nav-menu-coach">
+        <button class="nav-item active" data-view="dashboard" id="nav-dashboard">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <rect width="7" height="9" x="3" y="3" rx="1" />
+            <rect width="7" height="5" x="14" y="3" rx="1" />
+            <rect width="7" height="9" x="14" y="12" rx="1" />
+            <rect width="7" height="5" x="3" y="16" rx="1" />
+          </svg>
+          <span>Dashboard</span>
+        </button>
+        <button class="nav-item" data-view="clients" id="nav-clients">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+          </svg>
+          <span>Mis Clientes</span>
+          <span class="nav-count" id="nav-clients-count">0</span>
+        </button>
+        <button class="nav-item" data-view="routines" id="nav-routines">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="m6.5 6.5 11 11" />
+            <path d="m21 21-1-1" />
+            <path d="m3 3 1 1" />
+            <path d="m18 22 4-4" />
+            <path d="m2 6 4-4" />
+            <path d="m3 10 7-7" />
+            <path d="m14 21 7-7" />
+          </svg>
+          <span>Rutinas & Ejercicios</span>
+        </button>
+        <button class="nav-item" data-view="progress" id="nav-progress">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+          </svg>
+          <span>Progreso & Marcas</span>
+        </button>
+        <button class="nav-item" data-view="calendar" id="nav-calendar">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
+            <line x1="16" x2="16" y1="2" y2="6" />
+            <line x1="8" x2="8" y1="2" y2="6" />
+            <line x1="3" x2="21" y1="10" y2="10" />
+          </svg>
+          <span>Planificador</span>
+        </button>
+      </nav>
+
+      <!-- NAV MENÚ: CLIENTE / ATLETA -->
+      <nav class="nav-menu" id="nav-menu-client" style="display: none;">
+        <button class="nav-item" data-view="client-workout" id="nav-client-workout">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10" />
+            <polyline points="12 6 12 12 16 14" />
+          </svg>
+          <span>Mi Entrenamiento</span>
+        </button>
+        <button class="nav-item" data-view="client-shop" id="nav-client-shop">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
+            <path d="M3 6h18" />
+            <path d="M16 10a4 4 0 0 1-8 0" />
+          </svg>
+          <span>Planes & Membresías</span>
+          <span class="nav-count badge-accent" id="nav-plans-badge">VIP</span>
+        </button>
+        <button class="nav-item" data-view="client-booking" id="nav-client-booking">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <rect width="18" height="18" x="3" y="4" rx="2" />
+            <line x1="16" x2="16" y1="2" y2="6" />
+            <line x1="8" x2="8" y1="2" y2="6" />
+            <line x1="3" x2="21" y1="10" y2="10" />
+            <path d="m9 16 2 2 4-4" />
+          </svg>
+          <span>Reservar con Coach</span>
+        </button>
+        <button class="nav-item" data-view="client-progress" id="nav-client-progress">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+          </svg>
+          <span>Mi Evolución</span>
+        </button>
+      </nav>
+
+      <div class="coach-profile-card" id="sidebar-profile-card">
+        <div class="coach-avatar" id="sidebar-user-avatar">AJ</div>
+        <div class="coach-details">
+          <h4 id="sidebar-user-name">Andrés Jáuregui</h4>
+          <p id="sidebar-user-tag">Head Coach</p>
+        </div>
+      </div>
+    </aside>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="main-content">
+
+      <!-- TOP BAR HEADER -->
+      <header class="topbar">
+        <div class="topbar-title">
+          <h1 id="page-title">Dashboard</h1>
+          <p id="page-subtitle">Panel de control de rendimiento y atletas</p>
+        </div>
+        <div class="topbar-actions" id="topbar-actions-coach">
+          <button class="btn btn-secondary" id="btn-quick-routine" onclick="App.openRoutineModal()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+            <span class="desktop-only">Nueva Rutina</span>
+          </button>
+          <button class="btn btn-primary" id="btn-quick-client" onclick="App.openClientModal()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+              <circle cx="9" cy="7" r="4" />
+              <line x1="19" x2="19" y1="8" y2="14" />
+              <line x1="22" x2="16" y1="11" y2="11" />
+            </svg>
+            <span>Nuevo Atleta</span>
+          </button>
+        </div>
+        <div class="topbar-actions" id="topbar-actions-client" style="display: none;">
+          <button class="btn btn-secondary" onclick="App.navigate('client-shop')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
+              <path d="M3 6h18" />
+              <path d="M16 10a4 4 0 0 1-8 0" />
+            </svg>
+            <span>Planes & Membresías</span>
+          </button>
+          <button class="btn btn-primary" onclick="App.navigate('client-booking')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect width="18" height="18" x="3" y="4" rx="2" />
+              <line x1="16" x2="16" y1="2" y2="6" />
+              <line x1="8" x2="8" y1="2" y2="6" />
+              <line x1="3" x2="21" y1="10" y2="10" />
+              <path d="m9 16 2 2 4-4" />
+            </svg>
+            <span>Reservar Sesión</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- VISTA 1: DASHBOARD -->
+      <section class="view active" id="view-dashboard">
+
+        <!-- KPI CARDS (Bento Grid) -->
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-icon icon-green">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+              </svg>
+            </div>
+            <div class="kpi-data">
+              <span class="kpi-label">Atletas Activos</span>
+              <h3 class="kpi-value" id="kpi-total-clients">0</h3>
+            </div>
+            <span class="kpi-trend positive">+2 este mes</span>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-icon icon-blue">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect width="18" height="18" x="3" y="4" rx="2" />
+                <path d="M3 10h18" />
+                <path d="m9 16 2 2 4-4" />
+              </svg>
+            </div>
+            <div class="kpi-data">
+              <span class="kpi-label">Sesiones Hoy</span>
+              <h3 class="kpi-value" id="kpi-today-sessions">0</h3>
+            </div>
+            <span class="kpi-badge">En curso</span>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-icon icon-purple">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="m6.5 6.5 11 11" />
+                <path d="m21 21-1-1" />
+                <path d="m3 3 1 1" />
+              </svg>
+            </div>
+            <div class="kpi-data">
+              <span class="kpi-label">Rutinas Creadas</span>
+              <h3 class="kpi-value" id="kpi-total-routines">0</h3>
+            </div>
+            <span class="kpi-trend">Plantillas listas</span>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-icon icon-amber">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                <polyline points="22 4 12 14.01 9 11.01" />
+              </svg>
+            </div>
+            <div class="kpi-data">
+              <span class="kpi-label">Adherencia Media</span>
+              <h3 class="kpi-value" id="kpi-adherence">94%</h3>
+            </div>
+            <span class="kpi-trend positive">Excelente</span>
+          </div>
+        </div>
+
+        <!-- DASHBOARD BODY: SESIONES DE HOY & ACCIONES -->
+        <div class="dashboard-columns">
+
+          <!-- Columna Izquierda: Sesiones de Hoy -->
+          <div class="content-box">
+            <div class="box-header">
+              <div>
+                <h3>Plan de Entrenamiento de Hoy</h3>
+                <p class="text-muted">Atletas con rutinas programadas para hoy</p>
+              </div>
+              <button class="btn btn-sm btn-ghost" onclick="App.navigate('calendar')">Ver Calendario ↗</button>
+            </div>
+            <div class="sessions-list" id="dashboard-sessions-list">
+              <!-- Renderizado dinámico -->
+            </div>
+          </div>
+
+          <!-- Columna Derecha: Resumen de Atletas Recientes & Marcas -->
+          <div class="content-box">
+            <div class="box-header">
+              <div>
+                <h3>Atletas Destacados</h3>
+                <p class="text-muted">Últimos progresos y actividad</p>
+              </div>
+              <button class="btn btn-sm btn-ghost" onclick="App.navigate('clients')">Ver Todos ↗</button>
+            </div>
+            <div class="featured-clients-list" id="dashboard-featured-clients">
+              <!-- Renderizado dinámico -->
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- VISTA 2: CLIENTES (CRM) -->
+      <section class="view" id="view-clients">
+        <div class="filter-bar">
+          <div class="search-input-wrap">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8" />
+              <path d="m21 21-4.3-4.3" />
+            </svg>
+            <input type="text" id="client-search-input" placeholder="Buscar por nombre, objetivo o teléfono..."
+              oninput="App.filterClients()">
+          </div>
+          <div class="filter-pills" id="client-goal-filters">
+            <button class="pill-btn active" data-filter="all" onclick="App.setClientFilter('all')">Todos</button>
+            <button class="pill-btn" data-filter="Hipertrofia"
+              onclick="App.setClientFilter('Hipertrofia')">Hipertrofia</button>
+            <button class="pill-btn" data-filter="Pérdida de Grasa"
+              onclick="App.setClientFilter('Pérdida de Grasa')">Pérdida Grasa</button>
+            <button class="pill-btn" data-filter="Fuerza" onclick="App.setClientFilter('Fuerza')">Fuerza</button>
+            <button class="pill-btn" data-filter="Rendimiento"
+              onclick="App.setClientFilter('Rendimiento')">Rendimiento</button>
+          </div>
+        </div>
+
+        <div class="clients-grid" id="clients-cards-container">
+          <!-- Renderizado dinámico de tarjetas de cliente -->
+        </div>
+      </section>
+
+      <!-- VISTA 3: RUTINAS & EJERCICIOS -->
+      <section class="view" id="view-routines">
+        <div class="routines-header-action">
+          <div>
+            <h3>Catálogo de Rutinas y Plantillas</h3>
+            <p class="text-muted">Diseña planes por bloques, días de entrenamiento y sobrecarga progresiva</p>
+          </div>
+          <button class="btn btn-primary" onclick="App.openRoutineModal()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+            <span>Crear Nueva Rutina</span>
+          </button>
+        </div>
+
+        <div class="routines-grid" id="routines-cards-container">
+          <!-- Renderizado dinámico de rutinas -->
+        </div>
+
+        <div class="exercise-library-section">
+          <div class="box-header">
+            <div>
+              <h3>Biblioteca de Ejercicios por Grupo Muscular</h3>
+              <p class="text-muted">Movimientos patrón con series y tempos sugeridos</p>
+            </div>
+            <div class="muscle-tags" id="muscle-selector">
+              <button class="tag-btn active" onclick="App.showMuscleGroup('Pecho')">Pecho</button>
+              <button class="tag-btn" onclick="App.showMuscleGroup('Espalda')">Espalda</button>
+              <button class="tag-btn" onclick="App.showMuscleGroup('Pierna')">Pierna</button>
+              <button class="tag-btn" onclick="App.showMuscleGroup('Hombro')">Hombro</button>
+              <button class="tag-btn" onclick="App.showMuscleGroup('Brazos')">Brazos</button>
+              <button class="tag-btn" onclick="App.showMuscleGroup('Core')">Core</button>
+            </div>
+          </div>
+          <div class="exercises-grid" id="exercises-library-container">
+            <!-- Renderizado dinámico de ejercicios -->
+          </div>
+        </div>
+      </section>
+
+      <!-- VISTA 4: PROGRESO & MARCAS -->
+      <section class="view" id="view-progress">
+        <div class="progress-client-selector-bar">
+          <div class="selector-info">
+            <label for="progress-client-select">Seleccionar Atleta:</label>
+            <select id="progress-client-select" onchange="App.onProgressClientChange()">
+              <!-- Opciones dinámicas de clientes -->
+            </select>
+          </div>
+          <button class="btn btn-secondary" onclick="App.openProgressModal()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+            <span>Registrar Nuevo Pesaje / 1RM</span>
+          </button>
+        </div>
+
+        <!-- GRÁFICAS Y MÉTRICAS -->
+        <div class="progress-grid">
+
+          <!-- Tarjeta de Evolución de Peso -->
+          <div class="content-box progress-chart-box">
+            <div class="box-header">
+              <div>
+                <h3>Evolución de Peso Corporal (kg)</h3>
+                <p class="text-muted" id="weight-trend-label">Historial de registros</p>
+              </div>
+              <span class="badge badge-green" id="weight-total-diff">-3.4 kg total</span>
+            </div>
+            <div class="chart-wrapper">
+              <svg class="native-svg-chart" id="weight-chart-svg" viewBox="0 0 600 240">
+                <!-- Dibujo dinámico de la gráfica con SVG -->
+              </svg>
+            </div>
+          </div>
+
+          <!-- Tarjetas de Marcas Personales (PRs 1RM) -->
+          <div class="content-box">
+            <div class="box-header">
+              <div>
+                <h3>Marcas Personales (1RM)</h3>
+                <p class="text-muted">Cargas máximas estimadas</p>
+              </div>
+            </div>
+            <div class="prs-grid" id="client-prs-container">
+              <!-- Renderizado de PRs: Sentadilla, Banca, Peso Muerto, Militar -->
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- VISTA 5: CALENDARIO & PLANIFICADOR -->
+      <section class="view" id="view-calendar">
+        <div class="calendar-header-bar">
+          <div>
+            <h3>Planificador Semanal de Entrenamientos</h3>
+            <p class="text-muted">Organización de sesiones programadas para tus atletas</p>
+          </div>
+          <button class="btn btn-primary" onclick="App.openScheduleSessionModal()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+            <span>Agendar Sesión</span>
+          </button>
+        </div>
+
+        <div class="week-calendar-grid" id="week-calendar-container">
+          <!-- Renderizado de Lunes a Domingo con sesiones -->
+        </div>
+      </section>
+
+      <!-- VISTA CLIENTE 1: MI ENTRENAMIENTO -->
+      <section class="view" id="view-client-workout">
+        <div class="client-workout-hero" id="client-workout-hero">
+          <!-- Renderizado dinámico: Rutina asignada, tags, descripción -->
+        </div>
+
+        <!-- WIDGET: CRONÓMETRO DE DESCANSO ENTRE SERIES -->
+        <div class="rest-timer-box">
+          <div class="rest-timer-header">
+            <div class="rest-timer-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10" />
+                <polyline points="12 6 12 12 16 14" />
+              </svg>
+              <span>Temporizador de Descanso entre Series</span>
+            </div>
+            <div class="rest-presets">
+              <button class="btn btn-xs btn-secondary" onclick="App.setRestTimer(45)">45s</button>
+              <button class="btn btn-xs btn-secondary" onclick="App.setRestTimer(60)">60s</button>
+              <button class="btn btn-xs btn-secondary active" onclick="App.setRestTimer(90)">90s</button>
+              <button class="btn btn-xs btn-secondary" onclick="App.setRestTimer(120)">120s</button>
+            </div>
+          </div>
+          <div class="rest-timer-display">
+            <span class="timer-digits" id="timer-display">01:30</span>
+            <div class="timer-controls">
+              <button class="btn btn-sm btn-primary" id="timer-start-btn"
+                onclick="App.toggleRestTimer()">Iniciar</button>
+              <button class="btn btn-sm btn-ghost" onclick="App.resetRestTimer()">Reiniciar</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- LISTA INTERACTIVA DE EJERCICIOS Y REGISTRO DE SERIES -->
+        <div class="client-exercises-container" id="client-exercises-list">
+          <!-- Renderizado dinámico de ejercicios con sets interactivos -->
+        </div>
+
+        <div class="client-workout-footer">
+          <button class="btn btn-primary btn-lg" onclick="App.completeClientWorkout()" id="btn-complete-workout">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+            <span>¡Finalizar Entrenamiento de Hoy!</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- VISTA CLIENTE 2: PLANES Y MEMBRESÍAS -->
+      <section class="view" id="view-client-shop">
+        <div class="shop-hero">
+          <div class="shop-hero-badge">TIENDA OFICIAL DE COACHING</div>
+          <h2>Elige el Plan que Impulsará tu Transformación</h2>
+          <p class="text-muted">Asesorías guiadas con sobrecarga progresiva, ajustes semanales y comunicación directa
+            con tu coach.</p>
+        </div>
+
+        <!-- Banner de membresía actual -->
+        <div class="current-membership-banner" id="current-membership-banner">
+          <!-- Renderizado dinámico según el plan del atleta -->
+        </div>
+
+        <!-- Bento Grid de Planes -->
+        <div class="plans-grid" id="plans-container">
+          <!-- Renderizado dinámico de planes con precios y beneficios -->
+        </div>
+      </section>
+
+      <!-- VISTA CLIENTE 3: RESERVAR SESIÓN CON EL COACH -->
+      <section class="view" id="view-client-booking">
+        <div class="booking-header">
+          <div>
+            <h3>Agenda y Disponibilidad del Entrenador</h3>
+            <p class="text-muted">Reserva tu sesión presencial o videollamada 1-a-1 en los horarios habilitados por
+              Coach Andrés.</p>
+          </div>
+          <div class="booking-status-pill">
+            <span class="dot-online"></span> Horarios en tiempo real
+          </div>
+        </div>
+
+        <!-- Próximas reservas del atleta -->
+        <div class="client-upcoming-bookings" id="client-upcoming-bookings">
+          <!-- Renderizado de citas ya reservadas por este atleta con botón cancelar -->
+        </div>
+
+        <!-- Filtro por día -->
+        <div class="booking-day-filters" id="booking-day-filters">
+          <button class="tag-btn active" onclick="App.filterBookingDay('Todos')">Todos los días</button>
+          <button class="tag-btn" onclick="App.filterBookingDay('Lunes')">Lunes</button>
+          <button class="tag-btn" onclick="App.filterBookingDay('Martes')">Martes</button>
+          <button class="tag-btn" onclick="App.filterBookingDay('Miércoles')">Miércoles</button>
+          <button class="tag-btn" onclick="App.filterBookingDay('Jueves')">Jueves</button>
+          <button class="tag-btn" onclick="App.filterBookingDay('Viernes')">Viernes</button>
+          <button class="tag-btn" onclick="App.filterBookingDay('Sábado')">Sábado</button>
+        </div>
+
+        <!-- Grid de horarios del coach -->
+        <div class="booking-slots-grid" id="booking-slots-container">
+          <!-- Renderizado dinámico de slots con estado Disponible / Reservado -->
+        </div>
+      </section>
+
+      <!-- VISTA CLIENTE 4: MI EVOLUCIÓN PERSONAL -->
+      <section class="view" id="view-client-progress">
+        <div class="client-progress-header">
+          <div>
+            <h3>Mi Evolución y Récords Personales</h3>
+            <p class="text-muted">Historial de pesaje, evolución de cargas 1RM y notas de tu entrenador.</p>
+          </div>
+          <button class="btn btn-secondary" onclick="App.openClientCheckinModal()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+            <span>Registrar Pesaje / Marcas</span>
+          </button>
+        </div>
+
+        <div class="client-kpis-grid" id="client-kpis-container">
+          <!-- KPIs del cliente actual: Peso, Adherencia, PRs -->
+        </div>
+
+        <div class="client-coach-notes-box" id="client-coach-notes-container">
+          <!-- Notas del entrenador hacia el atleta -->
+        </div>
+
+        <div class="content-box" style="margin-top: 1.5rem;">
+          <div class="box-header">
+            <div>
+              <h3>Historial de Evaluaciones y Pesajes</h3>
+              <p class="text-muted">Registro temporal de evolución corporal y marcas de fuerza</p>
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table" id="client-history-table">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Peso</th>
+                  <th>Sentadilla (1RM)</th>
+                  <th>Press Banca (1RM)</th>
+                  <th>Peso Muerto (1RM)</th>
+                  <th>Press Militar (1RM)</th>
+                </tr>
+              </thead>
+              <tbody id="client-history-tbody">
+                <!-- Filas dinámicas -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- NAVEGACIÓN MÓVIL INFERIOR -->
+    <nav class="mobile-nav" id="mobile-nav-coach">
+      <button class="mobile-nav-item active" data-view="dashboard">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect width="7" height="9" x="3" y="3" rx="1" />
+          <rect width="7" height="5" x="14" y="3" rx="1" />
+          <rect width="7" height="9" x="14" y="12" rx="1" />
+          <rect width="7" height="5" x="3" y="16" rx="1" />
+        </svg>
+        <span>Inicio</span>
+      </button>
+      <button class="mobile-nav-item" data-view="clients">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+          <circle cx="9" cy="7" r="4" />
+        </svg>
+        <span>Atletas</span>
+      </button>
+      <button class="mobile-nav-item" data-view="routines">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="m6.5 6.5 11 11" />
+          <path d="m21 21-1-1" />
+          <path d="m3 3 1 1" />
+        </svg>
+        <span>Rutinas</span>
+      </button>
+      <button class="mobile-nav-item" data-view="progress">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+        </svg>
+        <span>Progreso</span>
+      </button>
+      <button class="mobile-nav-item" data-view="calendar">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect width="18" height="18" x="3" y="4" rx="2" />
+          <line x1="16" x2="16" y1="2" y2="6" />
+          <line x1="8" x2="8" y1="2" y2="6" />
+          <line x1="3" x2="21" y1="10" y2="10" />
+        </svg>
+        <span>Agenda</span>
+      </button>
+    </nav>
+
+    <nav class="mobile-nav" id="mobile-nav-client" style="display: none;">
+      <button class="mobile-nav-item active" data-view="client-workout">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10" />
+          <polyline points="12 6 12 12 16 14" />
+        </svg>
+        <span>Entreno</span>
+      </button>
+      <button class="mobile-nav-item" data-view="client-shop">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
+          <path d="M3 6h18" />
+        </svg>
+        <span>Planes</span>
+      </button>
+      <button class="mobile-nav-item" data-view="client-booking">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect width="18" height="18" x="3" y="4" rx="2" />
+          <line x1="16" x2="16" y1="2" y2="6" />
+          <line x1="8" x2="8" y1="2" y2="6" />
+        </svg>
+        <span>Reservar</span>
+      </button>
+      <button class="mobile-nav-item" data-view="client-progress">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+        </svg>
+        <span>Evolución</span>
+      </button>
+    </nav>
+
+  </div>
+
+  <!-- MODALES INTERACTIVOS -->
+
+  <!-- MODAL: NUEVO CLIENTE -->
+  <div class="modal-backdrop" id="modal-client">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>Alta de Nuevo Atleta</h3>
+        <button class="modal-close-btn" onclick="App.closeModals()">✕</button>
+      </div>
+      <form id="form-new-client" onsubmit="App.saveClient(event)">
+        <div class="form-group">
+          <label>Nombre y Apellidos *</label>
+          <input type="text" id="client-name" required placeholder="Ej: Carlos Mendoza">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Objetivo Principal *</label>
+            <select id="client-goal" required>
+              <option value="Hipertrofia">Hipertrofia (Ganancia Muscular)</option>
+              <option value="Pérdida de Grasa">Pérdida de Grasa</option>
+              <option value="Fuerza">Ganancia de Fuerza</option>
+              <option value="Rendimiento">Rendimiento Atlético</option>
+              <option value="Salud General">Salud & Movilidad</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Nivel de Experiencia</label>
+            <select id="client-level">
+              <option value="Intermedio">Intermedio</option>
+              <option value="Principiante">Principiante</option>
+              <option value="Avanzado">Avanzado</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Peso Actual (kg) *</label>
+            <input type="number" step="0.1" id="client-weight" required placeholder="Ej: 78.5">
+          </div>
+          <div class="form-group">
+            <label>Altura (cm) *</label>
+            <input type="number" id="client-height" required placeholder="Ej: 178">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Teléfono / WhatsApp</label>
+            <input type="tel" id="client-phone" placeholder="Ej: +34 612 345 678">
+          </div>
+          <div class="form-group">
+            <label>Rutina Asignada Inicial</label>
+            <select id="client-assigned-routine">
+              <!-- Cargado dinámicamente -->
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Notas del Entrenador / Historial Lesiones</label>
+          <textarea id="client-notes" rows="2"
+            placeholder="Molestias en hombro derecho al presionar, prefiere entrenar 4 días..."></textarea>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" onclick="App.closeModals()">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Registrar Atleta</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: FICHA DETALLADA DE CLIENTE -->
+  <div class="modal-backdrop" id="modal-client-detail">
+    <div class="modal-box modal-lg">
+      <div class="modal-header">
+        <div class="client-detail-header-left">
+          <div class="detail-avatar" id="detail-client-avatar">CM</div>
+          <div>
+            <h3 id="detail-client-name">Carlos Mendoza</h3>
+            <span class="badge badge-green" id="detail-client-goal">Hipertrofia</span>
+          </div>
+        </div>
+        <button class="modal-close-btn" onclick="App.closeModals()">✕</button>
+      </div>
+      <div class="client-detail-body">
+        <div class="detail-metrics-grid">
+          <div class="detail-metric-card">
+            <span>Peso Actual</span>
+            <strong id="detail-client-weight">78.5 kg</strong>
+          </div>
+          <div class="detail-metric-card">
+            <span>Altura</span>
+            <strong id="detail-client-height">178 cm</strong>
+          </div>
+          <div class="detail-metric-card">
+            <span>Adherencia</span>
+            <strong id="detail-client-adherence" class="text-green">96%</strong>
+          </div>
+          <div class="detail-metric-card">
+            <span>Nivel</span>
+            <strong id="detail-client-level">Intermedio</strong>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <h4>Rutina Actual en Curso</h4>
+          <div class="detail-routine-card" id="detail-client-routine-box">
+            <!-- Contenido dinámico -->
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <h4>Notas de Seguimiento & Coaching</h4>
+          <p class="detail-notes-text" id="detail-client-notes">Sin notas registradas.</p>
+        </div>
+
+        <div class="detail-actions-bar">
+          <a class="btn btn-secondary" id="detail-whatsapp-btn" target="_blank" href="#">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path
+                d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+            </svg>
+            Contactar por WhatsApp
+          </a>
+          <button class="btn btn-ghost text-danger" onclick="App.deleteCurrentClient()">
+            Eliminar Atleta
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: CREAR RUTINA -->
+  <div class="modal-backdrop" id="modal-routine">
+    <div class="modal-box modal-lg">
+      <div class="modal-header">
+        <h3>Constructor de Rutina</h3>
+        <button class="modal-close-btn" onclick="App.closeModals()">✕</button>
+      </div>
+      <form id="form-new-routine" onsubmit="App.saveRoutine(event)">
+        <div class="form-row">
+          <div class="form-group" style="flex: 2;">
+            <label>Nombre del Plan / Rutina *</label>
+            <input type="text" id="routine-name" required placeholder="Ej: Push Day - Hipertrofia & Fuerza">
+          </div>
+          <div class="form-group" style="flex: 1;">
+            <label>Enfoque Principal *</label>
+            <select id="routine-category">
+              <option value="Torso / Push">Torso / Push</option>
+              <option value="Espalda / Pull">Espalda / Pull</option>
+              <option value="Pierna / Lower">Pierna / Lower</option>
+              <option value="Fullbody">Fullbody</option>
+              <option value="Fuerza 5x5">Fuerza Pura</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Descripción / Instrucciones</label>
+          <input type="text" id="routine-description"
+            placeholder="Descanso de 90-120s en ejercicios multiarticulares...">
+        </div>
+
+        <div class="form-section-title">
+          <h4>Ejercicios del Entrenamiento</h4>
+          <button type="button" class="btn btn-xs btn-secondary" onclick="App.addExerciseRowToRoutine()">+ Añadir
+            Ejercicio</button>
+        </div>
+
+        <div class="routine-builder-exercises-list" id="routine-exercises-list">
+          <!-- Filas de ejercicios dinámicas -->
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" onclick="App.closeModals()">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Guardar Rutina</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: REGISTRAR PESAJE & 1RM -->
+  <div class="modal-backdrop" id="modal-progress">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>Registrar Registro Biométrico & Carga</h3>
+        <button class="modal-close-btn" onclick="App.closeModals()">✕</button>
+      </div>
+      <form id="form-new-progress" onsubmit="App.saveProgressEntry(event)">
+        <div class="form-group">
+          <label>Atleta *</label>
+          <select id="progress-entry-client" required>
+            <!-- Cargado dinámicamente -->
+          </select>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Fecha *</label>
+            <input type="date" id="progress-date" required>
+          </div>
+          <div class="form-group">
+            <label>Nuevo Peso (kg) *</label>
+            <input type="number" step="0.1" id="progress-weight" required placeholder="77.8">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Sentadilla 1RM (kg)</label>
+            <input type="number" id="progress-pr-squat" placeholder="Ej: 140">
+          </div>
+          <div class="form-group">
+            <label>Press Banca 1RM (kg)</label>
+            <input type="number" id="progress-pr-bench" placeholder="Ej: 100">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Peso Muerto 1RM (kg)</label>
+            <input type="number" id="progress-pr-deadlift" placeholder="Ej: 180">
+          </div>
+          <div class="form-group">
+            <label>Press Militar 1RM (kg)</label>
+            <input type="number" id="progress-pr-ohp" placeholder="Ej: 65">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" onclick="App.closeModals()">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Guardar Progreso</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: AGENDAR SESIÓN -->
+  <div class="modal-backdrop" id="modal-schedule">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>Agendar Sesión de Entrenamiento</h3>
+        <button class="modal-close-btn" onclick="App.closeModals()">✕</button>
+      </div>
+      <form id="form-new-schedule" onsubmit="App.saveScheduledSession(event)">
+        <div class="form-group">
+          <label>Atleta *</label>
+          <select id="schedule-client" required>
+            <!-- Opciones dinámicas -->
+          </select>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Día de la Semana *</label>
+            <select id="schedule-day" required>
+              <option value="Lunes">Lunes</option>
+              <option value="Martes">Martes</option>
+              <option value="Miércoles">Miércoles</option>
+              <option value="Jueves">Jueves</option>
+              <option value="Viernes">Viernes</option>
+              <option value="Sábado">Sábado</option>
+              <option value="Domingo">Domingo</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Hora *</label>
+            <input type="time" id="schedule-time" value="10:00" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Rutina a Realizar *</label>
+          <select id="schedule-routine" required>
+            <!-- Rutinas dinámicas -->
+          </select>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" onclick="App.closeModals()">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Confirmar Sesión</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: ASIGNAR RUTINA A ATLETA -->
+  <div class="modal-backdrop" id="modal-assign-routine">
+    <div class="modal-box modal-lg">
+      <div class="modal-header">
+        <div>
+          <h3>Asignar Rutina a Atleta</h3>
+          <p class="text-muted" style="font-size: 0.82rem; margin-top: 2px;">Selecciona el atleta de la lista para
+            asignarle este plan de entrenamiento</p>
+        </div>
+        <button class="modal-close-btn" onclick="App.closeModals()">✕</button>
+      </div>
+
+      <!-- Banner de la Rutina Seleccionada -->
+      <div class="assign-routine-banner" id="assign-routine-banner">
+        <!-- Contenido dinámico -->
+      </div>
+
+      <!-- Barra de Filtro de Atletas -->
+      <div class="form-group" style="margin-bottom: 0.85rem;">
+        <label for="assign-routine-search">Filtrar lista de atletas:</label>
+        <input type="text" id="assign-routine-search" placeholder="Escribe el nombre, objetivo o nivel..."
+          oninput="App.filterAssignRoutineList()">
+      </div>
+
+      <!-- Lista Seleccionable de Atletas -->
+      <div class="assign-athletes-list" id="assign-routine-athletes-list">
+        <!-- Renderizado dinámico de atletas -->
+      </div>
+
+      <div class="modal-footer" style="margin-top: 1.25rem;">
+        <button type="button" class="btn btn-ghost" onclick="App.closeModals()">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: CHECKOUT / CONTRATAR PLAN -->
+  <div class="modal-backdrop" id="modal-checkout">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div>
+          <h3>Contratar Plan de Coaching</h3>
+          <p class="text-muted" style="font-size: 0.82rem; margin-top: 2px;">Suscripción mensual flexible, cancela
+            cuando quieras</p>
+        </div>
+        <button class="modal-close-btn" onclick="App.closeModals()">✕</button>
+      </div>
+
+      <!-- Resumen del Plan -->
+      <div class="checkout-plan-summary" id="checkout-plan-summary">
+        <!-- Renderizado dinámico -->
+      </div>
+
+      <form id="form-checkout" onsubmit="App.processPlanPurchase(event)">
+        <div class="form-group">
+          <label>Nombre del Titular *</label>
+          <input type="text" id="checkout-name" required placeholder="Ej: Carlos Mendoza">
+        </div>
+
+        <div class="form-group">
+          <label>Número de Tarjeta (Simulación) *</label>
+          <div class="input-card-wrapper">
+            <input type="text" id="checkout-card" required placeholder="4242 •••• •••• 4242" maxlength="19">
+            <span class="card-icon-badge">VISA / MC</span>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Expiración *</label>
+            <input type="text" id="checkout-exp" required placeholder="MM/AA" maxlength="5">
+          </div>
+          <div class="form-group">
+            <label>CVC / CVV *</label>
+            <input type="password" id="checkout-cvc" required placeholder="•••" maxlength="4">
+          </div>
+        </div>
+
+        <div class="checkout-security-notice">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+          </svg>
+          <span>Pago seguro encriptado con activación instantánea.</span>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" onclick="App.closeModals()">Cancelar</button>
+          <button type="submit" class="btn btn-primary" id="checkout-submit-btn">Pagar y Activar Plan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: CONFIRMAR RESERVA DE SESIÓN -->
+  <div class="modal-backdrop" id="modal-client-book">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div>
+          <h3>Confirmar Sesión con Coach</h3>
+          <p class="text-muted" style="font-size: 0.82rem; margin-top: 2px;">Reserva tu horario exclusivo 1-a-1</p>
+        </div>
+        <button class="modal-close-btn" onclick="App.closeModals()">✕</button>
+      </div>
+
+      <div class="booking-confirm-card" id="booking-confirm-card">
+        <!-- Resumen del día y hora seleccionados -->
+      </div>
+
+      <form id="form-confirm-booking" onsubmit="App.confirmClientBooking(event)">
+        <div class="form-group">
+          <label>Enfoque de la Sesión *</label>
+          <select id="booking-session-routine" required>
+            <!-- Rutinas disponibles -->
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Notas para el Coach (Opcional)</label>
+          <input type="text" id="booking-client-notes"
+            placeholder="Ej: Revisar técnica de peso muerto o dudas en nutrición...">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" onclick="App.closeModals()">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Confirmar Reserva</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: REPORTAR PESAJE & MARCAS (CLIENTE) -->
+  <div class="modal-backdrop" id="modal-client-checkin">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div>
+          <h3>Registrar Mi Pesaje & Marcas</h3>
+          <p class="text-muted" style="font-size: 0.82rem; margin-top: 2px;">Tu entrenador recibirá esta actualización
+            automáticamente</p>
+        </div>
+        <button class="modal-close-btn" onclick="App.closeModals()">✕</button>
+      </div>
+      <form id="form-client-checkin" onsubmit="App.saveClientCheckin(event)">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Fecha *</label>
+            <input type="date" id="client-checkin-date" required>
+          </div>
+          <div class="form-group">
+            <label>Peso Actual (kg) *</label>
+            <input type="number" step="0.1" id="client-checkin-weight" required placeholder="Ej: 78.2">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Sentadilla 1RM (kg)</label>
+            <input type="number" id="client-checkin-squat" placeholder="Ej: 135">
+          </div>
+          <div class="form-group">
+            <label>Press Banca 1RM (kg)</label>
+            <input type="number" id="client-checkin-bench" placeholder="Ej: 95">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Peso Muerto 1RM (kg)</label>
+            <input type="number" id="client-checkin-deadlift" placeholder="Ej: 165">
+          </div>
+          <div class="form-group">
+            <label>Press Militar 1RM (kg)</label>
+            <input type="number" id="client-checkin-ohp" placeholder="Ej: 60">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" onclick="App.closeModals()">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Guardar Reporte</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION -->
+  <div class="toast-container" id="toast">
+    <span id="toast-message">Operación realizada con éxito</span>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+
+</html>
